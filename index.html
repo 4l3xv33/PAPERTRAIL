@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PAPERTRAIL</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <div>
+        <p class="eyebrow">PAPERTRAIL</p>
+        <h1>PAPERTRAIL</h1>
+        <p class="tagline">Explore scholarly footprints with context.</p>
+      </div>
+      <p class="disclaimer">PAPERTRAIL surfaces bibliometric triage indicators. It does not determine misconduct, foreign influence, technology transfer, or security risk.</p>
+    </header>
+
+    <main>
+      <section class="panel search-panel" aria-labelledby="search-title">
+        <div class="section-heading">
+          <h2 id="search-title">Search</h2>
+          <button id="clear-cache-button" class="secondary" type="button">Clear Local Cache</button>
+        </div>
+
+        <form id="search-form" class="search-grid">
+          <label>
+            <span>Researcher Name</span>
+            <input id="name-input" name="name" type="search" autocomplete="off" placeholder="Ada Lovelace">
+          </label>
+          <label>
+            <span>ORCID</span>
+            <input id="orcid-input" name="orcid" type="search" autocomplete="off" placeholder="0000-0000-0000-0000">
+          </label>
+          <label>
+            <span>OpenAlex Author ID</span>
+            <input id="author-id-input" name="authorId" type="search" autocomplete="off" placeholder="A1234567890">
+          </label>
+          <label class="checkbox-row">
+            <input id="refresh-input" name="refresh" type="checkbox">
+            <span>Bypass local cache / Refresh from source</span>
+          </label>
+          <div class="button-row">
+            <button type="submit">Search</button>
+            <button id="clear-button" class="secondary" type="button">Clear</button>
+          </div>
+        </form>
+
+        <div class="status-row">
+          <span>Status</span>
+          <strong id="status-indicator">Ready</strong>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="results-title">
+        <div class="section-heading">
+          <h2 id="results-title">Search Results</h2>
+          <span id="results-source" class="source-badge">No source</span>
+        </div>
+        <div id="results-list" class="results-list empty-state">No search results yet.</div>
+      </section>
+
+      <section id="profile-section" class="panel hidden" aria-labelledby="profile-title">
+        <h2 id="profile-title">Author Profile</h2>
+        <div id="profile-content" class="profile-grid"></div>
+      </section>
+
+      <section id="dashboard-section" class="panel hidden" aria-labelledby="dashboard-title">
+        <div class="section-heading">
+          <h2 id="dashboard-title">Analysis Dashboard</h2>
+          <span id="analysis-source" class="source-badge">No source</span>
+        </div>
+        <div id="dashboard-grid" class="dashboard-grid"></div>
+      </section>
+
+      <section class="panel caution-panel" aria-labelledby="caution-title">
+        <h2 id="caution-title">Interpretation Caution</h2>
+        <p>This application surfaces bibliometric indicators requiring context.</p>
+        <p>Co-authorship is not proof of direct collaboration.</p>
+        <p>Large author lists can distort inferred relationships.</p>
+        <p>Bibliometric metadata may contain incomplete affiliations or errors.</p>
+        <p>This application is intended as a triage aid only.</p>
+      </section>
+
+      <section id="memo-section" class="panel hidden" aria-labelledby="memo-title">
+        <div class="section-heading">
+          <h2 id="memo-title">Analyst Memo</h2>
+          <div class="button-row">
+            <button id="copy-memo-button" class="secondary" type="button">Copy</button>
+            <button id="download-md-button" class="secondary" type="button">Download Markdown</button>
+            <button id="download-json-button" class="secondary" type="button">Download JSON</button>
+          </div>
+        </div>
+        <textarea id="memo-output" readonly spellcheck="false"></textarea>
+      </section>
+    </main>
+
+    <footer>
+      <p>PAPERTRAIL stores search, author, and works data only in this browser's local cache.</p>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
