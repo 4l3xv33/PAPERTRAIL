@@ -1,6 +1,6 @@
 # PAPERTRAIL
 
-[PAPERTRAIL GitHub Pages](https://4l3xv33.github.io/entity-explorer/)
+[PAPERTRAIL GitHub Pages](https://4l3xv33.github.io/PAPERTRAIL/)
 
 PAPERTRAIL is a lightweight research collaboration explorer for careful bibliometric triage. It helps users search for researchers, retrieve publication metadata through OpenAlex, explore scholarly collaboration patterns, cache results in the browser, and generate a careful analyst memo.
 
