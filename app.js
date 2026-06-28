@@ -1,4 +1,4 @@
-const DEFAULT_WORKER_URL = "";
+const DEFAULT_WORKER_URL = "https://papertrail-api.4l3xv33.workers.dev";
 const CACHE_TTL = {
   searches: 7 * 24 * 60 * 60 * 1000,
   authors: 30 * 24 * 60 * 60 * 1000,
