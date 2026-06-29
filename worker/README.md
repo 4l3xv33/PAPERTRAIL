@@ -19,13 +19,19 @@ Install Wrangler if needed:
 npm install -g wrangler
 ```
 
-From the project root, deploy with:
+From the `worker/` directory, deploy with the included `wrangler.toml`:
 
 ```powershell
-wrangler deploy worker/worker.js --name papertrail --compatibility-date 2026-06-27
+wrangler deploy
 ```
 
-You can also create a `wrangler.toml` if you want stable naming and environment configuration instead of passing those flags.
+The current configuration uses:
+
+```toml
+name = "papertrail-api"
+main = "worker.js"
+compatibility_date = "2026-06-28"
+```
 
 ## Set OPENALEX_API_KEY
 
@@ -60,6 +66,15 @@ const API_BASE_URL = "https://api.openalex.org";
 ```
 
 Update this value only if OpenAlex changes its API base URL or you intentionally route through another compatible service.
+
+OpenAlex request timeout and retry behavior is also centralized near the top of `worker.js`:
+
+```js
+const OPENALEX_TIMEOUT_MS = 30000;
+const OPENALEX_MAX_ATTEMPTS = 3;
+```
+
+The Worker retries transient `429`, `502`, `503`, and `504` responses with short backoff delays.
 
 ## CORS
 

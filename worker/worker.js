@@ -1,4 +1,8 @@
 const API_BASE_URL = "https://api.openalex.org";
+const OPENALEX_TIMEOUT_MS = 30000;
+const OPENALEX_MAX_ATTEMPTS = 3;
+const OPENALEX_RETRY_DELAYS_MS = [500, 1500];
+const OPENALEX_RETRY_STATUSES = new Set([429, 502, 503, 504]);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -137,24 +141,44 @@ async function openAlexFetch(path, params, env) {
 
   applyOpenAlexAuthentication(url, env);
 
-  const response = await fetch(url.toString(), {
-    headers: {
-      Accept: "application/json"
-    }
-  });
+  let lastError = null;
 
-  const payload = await response.json().catch(() => ({}));
+  for (let attempt = 1; attempt <= OPENALEX_MAX_ATTEMPTS; attempt += 1) {
+    try {
+      const response = await fetchWithTimeout(url.toString(), {
+        headers: {
+          Accept: "application/json"
+        }
+      });
 
-  if (!response.ok) {
-    throw withStatus(
-      payload.error ||
+      const payload = await response.json().catch(() => ({}));
+
+      if (response.ok) {
+        return payload;
+      }
+
+      const message =
+        payload.error ||
         payload.message ||
-        `OpenAlex request failed with status ${response.status}`,
-      response.status
-    );
+        `OpenAlex request failed with status ${response.status}`;
+
+      if (!shouldRetryStatus(response.status) || attempt === OPENALEX_MAX_ATTEMPTS) {
+        throw withStatus(message, response.status);
+      }
+
+      lastError = withStatus(message, response.status);
+    } catch (error) {
+      lastError = normalizeOpenAlexError(error);
+
+      if (!shouldRetryError(lastError) || attempt === OPENALEX_MAX_ATTEMPTS) {
+        throw lastError;
+      }
+    }
+
+    await delay(OPENALEX_RETRY_DELAYS_MS[attempt - 1] || OPENALEX_RETRY_DELAYS_MS.at(-1));
   }
 
-  return payload;
+  throw lastError || withStatus("OpenAlex request failed.", 502);
 }
 
 function applyOpenAlexAuthentication(url, env) {
@@ -163,6 +187,49 @@ function applyOpenAlexAuthentication(url, env) {
   }
 
   url.searchParams.set("api_key", env.OPENALEX_API_KEY);
+}
+
+async function fetchWithTimeout(url, options) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), OPENALEX_TIMEOUT_MS);
+
+  try {
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw withStatus("OpenAlex request timed out. Please retry in a few minutes.", 504);
+    }
+
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+function normalizeOpenAlexError(error) {
+  if (error.status) return error;
+
+  return withStatus(
+    error.message || "OpenAlex request failed before a response was received.",
+    502
+  );
+}
+
+function shouldRetryStatus(status) {
+  return OPENALEX_RETRY_STATUSES.has(status);
+}
+
+function shouldRetryError(error) {
+  return shouldRetryStatus(error.status);
+}
+
+function delay(milliseconds) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, milliseconds);
+  });
 }
 
 function normalizeAuthor(author) {
@@ -205,7 +272,7 @@ function normalizeWork(work) {
 }
 
 function normalizeConcepts(work) {
-  const raw = work.concepts || work.topics || [];
+  const raw = work.concepts?.length ? work.concepts : work.topics || [];
 
   return raw.map((item) => ({
     id: item.id || "",

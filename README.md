@@ -27,6 +27,7 @@ PAPERTRAIL/
   worker/
     worker.js
     README.md
+    wrangler.toml
 ```
 
 ## Local Use

@@ -223,6 +223,21 @@ function renderDashboard(analysis, source) {
   elements.dashboardSection.classList.remove("hidden");
 }
 
+function resetAnalysisSections() {
+  state.author = null;
+  state.works = [];
+  state.analysis = null;
+  state.memo = "";
+  state.exportData = null;
+  elements.profileSection.classList.add("hidden");
+  elements.dashboardSection.classList.add("hidden");
+  elements.memoSection.classList.add("hidden");
+  elements.profileContent.innerHTML = "";
+  elements.dashboardGrid.innerHTML = "";
+  elements.memoOutput.value = "";
+  elements.analysisSource.textContent = "No source";
+}
+
 function analyzeWorks(author, works) {
   const years = works.map((work) => work.publicationYear).filter(Boolean);
   const authorCounts = works.map((work) => work.authorships?.length || 0);
@@ -235,15 +250,14 @@ function analyzeWorks(author, works) {
   let fundedWorks = 0;
 
   works.forEach((work) => {
-    const authorNames = [];
     const workInstitutions = new Set();
     (work.authorships || []).forEach((authorship) => {
       const name = authorship.author?.displayName;
       const id = authorship.author?.id;
       if (id && cleanId(id) !== cleanId(author.id)) {
         increment(coauthors, name || id);
-        if (name) authorNames.push(name);
       }
+      (authorship.countries || []).forEach((country) => increment(countries, country));
       const authorInstitutionNames = new Set();
       (authorship.institutions || []).filter(Boolean).forEach((institution) => {
         if (institution.displayName) {
@@ -464,6 +478,7 @@ elements.clearButton.addEventListener("click", () => {
   elements.resultsList.className = "results-list empty-state";
   elements.resultsList.textContent = "No search results yet.";
   elements.resultsSource.textContent = "No source";
+  resetAnalysisSections();
   setStatus("Ready");
 });
 elements.clearCacheButton.addEventListener("click", async () => {
